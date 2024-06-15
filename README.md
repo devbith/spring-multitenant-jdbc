@@ -1,6 +1,8 @@
 # Spring Multi Tenant JDBC
 An example of multi tenant JBDC application with spring boot.
 
+![Gradle Build](https://github.com/devbith/spring-multitenant-jdbc/actions/workflows/gradle.yml/badge.svg)
+
 Uses `AbstractRoutingDatasource` from spring which dynamically determine the actual DataSource 
 based on the current context. In the scope of this project, the context is spring security context based on authentication. 
 
