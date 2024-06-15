@@ -12,7 +12,7 @@ Requirement: Java 21, Docker & Gradle.
     ```
     ./gradlew build
     ```
- 2. Start two instance PostgreSQL:
+ 2. Start two instance of PostgreSQL
 
      - With bash script 
           ```bash
@@ -26,21 +26,19 @@ Requirement: Java 21, Docker & Gradle.
         ```
        
 3. Run the application
-4. Send HTTP BASIC authentication request.
+4. Send HTTP BASIC authentication request
     ```
     curl -v -u steve@gmail.com:pw http://localhost:8080/customers
     curl -v -u robert@gmail.com:pw http://localhost:8080/customers
    ```
 
 *Here:*
-Each user `steve@gmail.com` & `robert@gmaill.com` contains tenant id which is the context returned by `determineCurrentLookupKey()`.
-method. When the HTTP BASIC request is being sent then based on the authentication of user `AbstractRoutingDatasource` determines the context   
-provides the associated `DataSource`.
+Each user, identified by their email (steve@gmail.com and robert@gmail.com), has an associated tenant ID, which is determined by the determineCurrentLookupKey() method. During an HTTP BASIC request, the AbstractRoutingDatasource class uses the user's authentication details to determine the context and provide the corresponding DataSource.
 
 ### Further experiment
-Login to database either of the database
-- `PGPASSWORD=pw psql -U user -h localhost -p 5431 user` 
-- `PGPASSWORD=pw psql -U user -h localhost -p 5432 user`
+To further test the functionality, log in to either of the databases:
+1. `PGPASSWORD=pw psql -U user -h localhost -p 5431 user` 
+2. `PGPASSWORD=pw psql -U user -h localhost -p 5432 user`
 
-then insert or remove the data and send above http basic auth request from step 4.
-Doing this we can see that `AbstractRoutingDatasource` is providing difference DataSource as per the context. 
+Insert or remove data from the selected database. Send an HTTP BASIC auth request as described in step 4.
+By doing this, we will observe that `AbstractRoutingDatasource` provides different DataSource instances based on the context, confirming its ability to route requests appropriately.
