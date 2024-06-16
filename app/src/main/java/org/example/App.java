@@ -105,6 +105,12 @@ class DataSourceConfiguration {
 
   private static final Logger logger = LoggerFactory.getLogger(DataSourceConfiguration.class);
 
+  /**
+   * @param dataSourceMap  Spring resolves this dependency. Spring under the hood maintains map-like structure where
+   *                       the bean names are the keys and the bean instances are the values of same type, allowing
+   *                       efficient bean retrieval and dependency resolution.
+   *                       For Example: Here there are two DataSource beans where the keys are ds1 and ds1
+   */
   @Bean
   @Primary
   DataSource multiTenantDataSource(Map<String, DataSource> dataSourceMap) {
@@ -112,16 +118,21 @@ class DataSourceConfiguration {
     var map = dataSourceMap.entrySet()
         .stream()
         .filter(e -> e.getKey().startsWith(prefix))
-        .collect(Collectors.toMap(e -> (Object) Integer.parseInt(e.getKey().substring(prefix.length())), e -> (Object) e.getValue()));
+        .collect(Collectors.toMap(
+            e -> (Object) Integer.parseInt(e.getKey().substring(prefix.length())),
+            e -> (Object) e.getValue()
+        ));
 
     map.forEach((tenantId, ds) -> {
-      var initializer = new ResourceDatabasePopulator(new ClassPathResource("schema.sql"), new ClassPathResource(prefix + tenantId + "-data.sql"));
+      ClassPathResource sqlSchemaResource = new ClassPathResource("schema.sql");
+      ClassPathResource sqlDataResource = new ClassPathResource(prefix + tenantId + "-data.sql");
+      var initializer = new ResourceDatabasePopulator(sqlSchemaResource, sqlDataResource);
       initializer.execute((DataSource) ds);
       logger.info("initialized datasource for %s", tenantId);
     });
 
-    var mds = new MultiTenantDataSource();
-    mds.setTargetDataSources(map);
+    MultiTenantDataSource mds = new MultiTenantDataSource();
+    mds.setTargetDataSources(map); // Important step
     return mds;
   }
 
